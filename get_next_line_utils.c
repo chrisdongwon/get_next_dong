@@ -6,7 +6,7 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:25 by cwon              #+#    #+#             */
-/*   Updated: 2024/09/22 17:46:49 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/01 00:32:42 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,29 @@ char	*ft_strchr(const char *s, int c)
 		i++;
 	}
 	return (0);
+}
+
+char	*ft_strjoin(char const *s1, char const *s2)
+{
+	char	*ptr;
+	size_t	i;
+	size_t	j;
+
+	i = 0;
+	j = 0;
+	if (!s1 || !s2)
+		return (0);
+	ptr = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	if (ptr)
+	{
+		while (s1[j])
+			ptr[i++] = s1[j++];
+		j = 0;
+		while (s2[j])
+			ptr[i++] = s2[j++];
+		ptr[i] = 0;
+	}
+	return (ptr);
 }
 
 char	*ft_substr(const char *s, unsigned int start, size_t len)
