@@ -6,13 +6,13 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:25 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/01 00:32:42 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/02 00:06:10 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *s)
+static size_t	ft_strlen(const char *s)
 {
 	size_t	length;
 
@@ -22,20 +22,41 @@ size_t	ft_strlen(const char *s)
 	return (length);
 }
 
-char	*ft_strchr(const char *s, int c)
+ssize_t	ft_strchr(const char *s, int c)
 {
 	size_t	i;
 	size_t	len;
 
 	i = 0;
-	len = ft_strlen(s) + 1;
+	len = ft_strlen(s);
 	while (i < len)
 	{
 		if (s[i] == (c % 128))
-			return ((char *)(s + i));
+			return (i);
 		i++;
 	}
-	return (0);
+	return (-1);
+}
+
+char	*ft_strdup(const char *s)
+{
+	char	*ptr;
+	size_t	i;
+	size_t	len;
+
+	len = ft_strlen(s);
+	ptr = (char *)malloc(len + 1);
+	i = 0;
+	if (s && ptr)
+	{
+		while (i < len)
+		{
+			ptr[i] = s[i];
+			i++;
+		}
+		ptr[i] = 0;
+	}
+	return (ptr);
 }
 
 char	*ft_strjoin(char const *s1, char const *s2)
