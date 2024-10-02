@@ -6,13 +6,13 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:25 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/02 00:06:10 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/02 17:57:42 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static size_t	ft_strlen(const char *s)
+size_t	ft_strlen(const char *s)
 {
 	size_t	length;
 
@@ -22,12 +22,10 @@ static size_t	ft_strlen(const char *s)
 	return (length);
 }
 
-ssize_t	ft_strchr(const char *s, int c)
+ssize_t	ft_strchr(const char *s, size_t i, int c)
 {
-	size_t	i;
 	size_t	len;
 
-	i = 0;
 	len = ft_strlen(s);
 	while (i < len)
 	{

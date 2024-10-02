@@ -6,89 +6,97 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:02 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/02 00:07:45 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/02 19:01:48 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/*
-Parsing [A \n B \0] with buffer_size = 1
-
-buffer:		[\n]
-result:		[A \n]
-remaining:	[]
-
-observations:
-1. refill buffer if and only if remaining has no newline.
-	otherwise, result comes from remaining.
-	doing so will only require malloc of buffer once in the start.
-2. always start by attaching buffer to remaining.
-	then, only parse on remaining for extraction.
-*/
-
 #include "get_next_line.h"
 
-static ssize_t	buffer_prep(int fd, char **buffer, char **remaining)
+static void	flush(char **arr)
 {
+	if (*arr)
+	{
+		free(*arr);
+		*arr = 0;
+	}
+}
+
+static ssize_t	extract_buffer(int fd, char **remaining)
+{
+	char	*buffer;
 	char	*temp;
 	ssize_t	bytes_read;
 
-	bytes_read = read(fd, *buffer, BUFFER_SIZE);
+	buffer = (char *)malloc(BUFFER_SIZE + 1);
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
 	if (bytes_read > 0)
 	{
+		buffer[bytes_read] = 0;
 		if (*remaining)
 		{
 			temp = ft_strdup(*remaining);
 			free(*remaining);
-			*remaining = ft_strjoin(temp, *buffer);
+			*remaining = ft_strjoin(temp, buffer);
 			free(temp);
 		}
 		else
-			*remaining = ft_strdup(*buffer);
+			*remaining = ft_strdup(buffer);
 	}
+	free(buffer);
 	return (bytes_read);
 }
 
-static void parse(int fd, char **buffer, char **result, char **remaining)
+static void	extract_remaining(char **remaining, size_t i)
 {
-	ssize_t	i;
 	char	*temp;
+	size_t	len;
 
-	i = ft_strchr(*remaining, '\n');
+	len = ft_strlen(*remaining);
+	if (i + 1 < len)
+	{
+		temp = ft_substr(*remaining, i + 1, len - i - 1);
+		free(*remaining);
+		*remaining = ft_strdup(temp);
+		free(temp);
+	}
+	else
+		flush(remaining);
+}
+
+static char	*extract_line(int fd, char **remaining)
+{
+	char	*result;
+	ssize_t	i;
+	ssize_t	bytes_read;
+
+	result = 0;
+	i = ft_strchr(*remaining, 0, '\n');
+	bytes_read = 1;
+	while (i == -1 && bytes_read > 0)
+	{
+		bytes_read = extract_buffer(fd, remaining);
+		i = ft_strchr(*remaining, i + 1, '\n');
+	}
 	if (i != -1)
 	{
-		*result = ft_substr(*remaining, 0, i + 1);
-		if (i + 1 < BUFFER_SIZE)
-		{
-			temp = ft_substr(*remaining, i + 1, BUFFER_SIZE - i);
-			free(*remaining);
-			*remaining = ft_strdup(temp);
-			free(temp);
-		}
-		else if(*remaining)
-		{
-			free(*remaining);
-			*remaining = 0;
-		}
+		result = ft_substr(*remaining, 0, i + 1);
+		extract_remaining(remaining, (size_t)i);
 	}
-	else if (buffer_prep(fd, buffer, remaining) > 0)
-		parse(fd, buffer, result, remaining);
-	else if (*remaining)
-		*result = *remaining;
+	else
+	{
+		result = ft_strdup(*remaining);
+		flush(remaining);
+	}
+	return (result);
 }
 
 char	*get_next_line(int fd)
 {
 	char		*result;
-	char		*buffer;
 	static char	*remaining;
 
 	result = 0;
-	buffer = (char *)malloc(BUFFER_SIZE + 1);
-	if (!buffer)
-		return (0);
-	buffer[BUFFER_SIZE] = 0;
-	if (buffer_prep(fd, &buffer, &remaining) > 0)
-		parse(fd, &buffer, &result, &remaining);
-	free(buffer);
+	if (extract_buffer(fd, &remaining) > 0 || remaining)
+		result = extract_line(fd, &remaining);
 	return (result);
 }

@@ -6,7 +6,7 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:20 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/02 00:06:00 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/02 17:57:59 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,10 @@
 
 char	*get_next_line(int fd);
 
-ssize_t	ft_strchr(const char *s, int c);
+ssize_t	ft_strchr(const char *s, size_t i, int c);
 char	*ft_strdup(const char *s);
 char	*ft_strjoin(char const *s1, char const *s2);
+size_t	ft_strlen(const char *s);
 char	*ft_substr(const char *s, unsigned int start, size_t len);
 
 #endif
