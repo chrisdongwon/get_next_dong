@@ -6,11 +6,12 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:25 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/02 19:03:53 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/02 22:53:13 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include <stdlib.h>
+#include <unistd.h>
 
 size_t	ft_strlen(const char *s)
 {
