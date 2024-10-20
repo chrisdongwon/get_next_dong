@@ -6,7 +6,7 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:02 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/02 19:05:37 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/20 17:41:04 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,31 +19,6 @@ static void	flush(char **arr)
 		free(*arr);
 		*arr = 0;
 	}
-}
-
-static ssize_t	extract_buffer(int fd, char **remaining)
-{
-	char	*buffer;
-	char	*temp;
-	ssize_t	bytes_read;
-
-	buffer = (char *)malloc(BUFFER_SIZE + 1);
-	bytes_read = read(fd, buffer, BUFFER_SIZE);
-	if (bytes_read > 0)
-	{
-		buffer[bytes_read] = 0;
-		if (*remaining)
-		{
-			temp = ft_strdup(*remaining);
-			free(*remaining);
-			*remaining = ft_strjoin(temp, buffer);
-			free(temp);
-		}
-		else
-			*remaining = ft_strdup(buffer);
-	}
-	free(buffer);
-	return (bytes_read);
 }
 
 static void	extract_remaining(char **remaining, size_t i)
@@ -63,6 +38,40 @@ static void	extract_remaining(char **remaining, size_t i)
 		flush(remaining);
 }
 
+static ssize_t	extract_buffer(int fd, char **remaining)
+{
+	char	*buffer;
+	char	*temp;
+	ssize_t	bytes_read;
+
+	buffer = (char *)malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (-1);
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	if (bytes_read == -1)
+	{
+		free(buffer);
+		free(*remaining);
+		*remaining = 0;
+		return (-1);
+	}
+	if (bytes_read > 0)
+	{
+		buffer[bytes_read] = 0;
+		if (*remaining)
+		{
+			temp = ft_strdup(*remaining);
+			free(*remaining);
+			*remaining = ft_strjoin(temp, buffer);
+			free(temp);
+		}
+		else
+			*remaining = ft_strdup(buffer);
+	}
+	free(buffer);
+	return (bytes_read);
+}
+
 static char	*extract_line(int fd, char **remaining)
 {
 	char	*result;
@@ -77,6 +86,13 @@ static char	*extract_line(int fd, char **remaining)
 		bytes_read = extract_buffer(fd, remaining);
 		i = ft_strchr(*remaining, i + 1, '\n');
 	}
+	if (bytes_read == -1)
+	{
+		free(result);
+		free(*remaining);
+		*remaining = 0;
+		return (0);
+	}
 	if (i != -1)
 	{
 		result = ft_substr(*remaining, 0, i + 1);
@@ -89,14 +105,24 @@ static char	*extract_line(int fd, char **remaining)
 	}
 	return (result);
 }
+#include <stdio.h>
 
 char	*get_next_line(int fd)
 {
 	char		*result;
 	static char	*remaining;
+	ssize_t		bytes_read;
 
 	result = 0;
-	if (extract_buffer(fd, &remaining) > 0 || remaining)
+	bytes_read = extract_buffer(fd, &remaining);
+	if (bytes_read == -1)
+	{
+		free(result);
+		free(remaining);
+		remaining = 0;
+		return (0);
+	}
+	if (bytes_read > 0 || remaining)
 		result = extract_line(fd, &remaining);
 	return (result);
 }

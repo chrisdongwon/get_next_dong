@@ -6,7 +6,7 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:25 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/02 22:53:13 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/20 15:30:19 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,11 @@ size_t	ft_strlen(const char *s)
 	size_t	length;
 
 	length = 0;
-	while (s[length])
-		length++;
+	if (s)
+	{
+		while (s[length])
+			length++;
+	}
 	return (length);
 }
 
@@ -28,13 +31,16 @@ ssize_t	ft_strchr(const char *s, size_t start, int c)
 	size_t	len;
 	size_t	i;
 
-	len = ft_strlen(s);
-	i = start;
-	while (i < len)
+	if (s)
 	{
-		if (s[i] == (c % 128))
-			return (i);
-		i++;
+		len = ft_strlen(s);
+		i = start;
+		while (i < len)
+		{
+			if (s[i] == (c % 128))
+				return (i);
+			i++;
+		}
 	}
 	return (-1);
 }
