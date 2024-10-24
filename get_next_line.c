@@ -6,97 +6,78 @@
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:02 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/02 19:05:37 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/24 23:17:11 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static void	flush(char **arr)
+#include <stdio.h>
+
+static void	flush(char *buffer, char **remaining)
 {
-	if (arr && *arr)
-	{
-		free(*arr);
-		*arr = 0;
-	}
+	free(buffer);
+	free(*remaining);
+	*remaining = 0;
 }
 
-static ssize_t	extract_buffer(int fd, char **remaining)
+static void	extract_remaining(int fd, char **remaining)
 {
 	char	*buffer;
 	char	*temp;
 	ssize_t	bytes_read;
 
 	buffer = (char *)malloc(BUFFER_SIZE + 1);
-	bytes_read = read(fd, buffer, BUFFER_SIZE);
-	if (bytes_read > 0)
+	if (!buffer)
+		return (flush(buffer, remaining));
+	bytes_read = 1;
+	temp = 0;
+	while (bytes_read && !ft_strchr(*remaining, '\n'))
 	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+			return (flush(buffer, remaining));
 		buffer[bytes_read] = 0;
 		if (*remaining)
-		{
-			temp = ft_strdup(*remaining);
-			free(*remaining);
-			*remaining = ft_strjoin(temp, buffer);
-			free(temp);
-		}
+			temp = ft_strjoin(*remaining, buffer);
 		else
-			*remaining = ft_strdup(buffer);
+			temp = ft_substr(buffer, 0, ft_strlen(buffer));
+		free(*remaining);
+		*remaining = temp;
 	}
 	free(buffer);
-	return (bytes_read);
 }
 
-static void	extract_remaining(char **remaining, size_t i)
+static char	*extract_line(char **remaining)
 {
+	size_t	i;
 	char	*temp;
-	size_t	len;
-
-	len = ft_strlen(*remaining);
-	if (i + 1 < len)
-	{
-		temp = ft_substr(*remaining, i + 1, len - i - 1);
-		free(*remaining);
-		*remaining = ft_strdup(temp);
-		free(temp);
-	}
-	else
-		flush(remaining);
-}
-
-static char	*extract_line(int fd, char **remaining)
-{
 	char	*result;
-	ssize_t	i;
-	ssize_t	bytes_read;
 
-	result = 0;
-	i = ft_strchr(*remaining, 0, '\n');
-	bytes_read = 1;
-	while (i == -1 && bytes_read > 0)
+	i = 0;
+	if (!*remaining[i])
 	{
-		bytes_read = extract_buffer(fd, remaining);
-		i = ft_strchr(*remaining, i + 1, '\n');
+		flush(0, remaining);
+		return (0);
 	}
-	if (i != -1)
-	{
-		result = ft_substr(*remaining, 0, i + 1);
-		extract_remaining(remaining, (size_t)i);
-	}
+	temp = ft_strchr(*remaining, '\n');
+	if (!temp)
+		i = ft_strlen(*remaining);
 	else
-	{
-		result = ft_strdup(*remaining);
-		flush(remaining);
-	}
+		i = temp - *remaining + 1;
+	result = ft_substr(*remaining, 0, i);
+	temp = ft_substr(*remaining, i, ft_strlen(*remaining) - i);
+	free(*remaining);
+	*remaining = temp;
 	return (result);
 }
 
 char	*get_next_line(int fd)
 {
-	char		*result;
 	static char	*remaining;
 
-	result = 0;
-	if (extract_buffer(fd, &remaining) > 0 || remaining)
-		result = extract_line(fd, &remaining);
-	return (result);
+	extract_remaining(fd, &remaining);
+	if (!remaining)
+		return (0);
+	return (extract_line(&remaining));
 }
