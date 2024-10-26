@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line _bonus.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:02 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/26 18:26:55 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/26 18:26:17 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static void	flush(char *buffer, char **remaining)
 {
@@ -68,16 +68,18 @@ static char	*extract_line(char **remaining)
 	return (result);
 }
 
+// hard limit on file descriptors: 1048576
+// terminal command: ulimit -n -H
 char	*get_next_line(int fd)
 {
-	static char	*remaining;
+	static char	*remaining[1048576];
 	char		*result;
 	ssize_t		bytes_read;
 
 	bytes_read = -1;
-	extract_remaining(fd, &remaining, &bytes_read);
-	if (!remaining)
+	extract_remaining(fd, &remaining[fd], &bytes_read);
+	if (!remaining[fd])
 		return (0);
-	result = extract_line(&remaining);
+	result = extract_line(&remaining[fd]);
 	return (result);
 }
