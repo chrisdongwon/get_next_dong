@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cwon <cwon@student.42bangkok.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 15:32:02 by cwon              #+#    #+#             */
-/*   Updated: 2024/10/28 01:06:13 by cwon             ###   ########.fr       */
+/*   Updated: 2024/10/28 01:05:12 by cwon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static char	*flush(char **remaining, char *buffer, int success)
 {
@@ -85,15 +85,19 @@ static char	*extract_line(int fd, char *buffer, char **remaining)
 	return (flush(remaining, buffer, 1));
 }
 
+// ulimit -Hn shows the hard limit
+// 1048576 on my system
 char	*get_next_line(int fd)
 {
 	char		*buffer;
-	static char	*remaining;
+	static char	*remaining[1048576];
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (flush(&remaining, 0, 0));
+	if (fd < 0)
+		return (0);
+	if (BUFFER_SIZE <= 0)
+		return (flush(&remaining[fd], 0, 0));
 	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
-		return (flush(&remaining, 0, 0));
-	return (extract_line(fd, buffer, &remaining));
+		return (flush(&remaining[fd], 0, 0));
+	return (extract_line(fd, buffer, &remaining[fd]));
 }
